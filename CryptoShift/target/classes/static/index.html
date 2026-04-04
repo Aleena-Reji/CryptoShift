@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Message Encryption</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan:  #00ffe7;
+      --pink:  #ff2d78;
+      --blue:  #3d9bff;
+      --mint:  #00ffb0;
+      --red:   #ff4444;
+      --bg:    #07080f;
+      --surface: #0d0f1a;
+      --border:  #1e2235;
+    }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background-color: var(--bg);
+      color: #c8cfe8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,231,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(61,155,255,0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none; z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; bottom: -140px; right: -140px;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(255,45,120,0.1) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 520px;
+      padding: 52px 40px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      color: var(--mint);
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .badge::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: var(--mint);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--mint);
+      animation: blink 1.6s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      text-shadow: 0 0 30px rgba(0,255,231,0.3);
+      letter-spacing: 0.06em;
+    }
+
+    h1 span { color: var(--pink); text-shadow: 0 0 24px rgba(255,45,120,0.5); }
+
+    .subtitle {
+      font-size: 13px;
+      color: #333a55;
+      margin-bottom: 48px;
+      letter-spacing: 0.12em;
+    }
+
+    .option-buttons { display: flex; flex-direction: column; gap: 16px; }
+
+    .option-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 26px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer; text-decoration: none;
+      position: relative; overflow: hidden;
+      transition: border-color 0.25s, background 0.25s;
+    }
+
+    .option-btn::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 4px; opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .encrypt-btn::before { background: var(--cyan); box-shadow: 0 0 14px var(--cyan); }
+    .decrypt-btn::before { background: var(--pink); box-shadow: 0 0 14px var(--pink); }
+
+    .encrypt-btn:hover { border-color: var(--cyan); background: rgba(0,255,231,0.05); }
+    .decrypt-btn:hover { border-color: var(--pink); background: rgba(255,45,120,0.05); }
+    .option-btn:hover::before { opacity: 1; }
+
+    .btn-left { display: flex; align-items: center; gap: 18px; }
+
+    .btn-icon {
+      width: 48px; height: 48px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; border: 1px solid;
+    }
+    .encrypt-btn .btn-icon { border-color: rgba(0,255,231,0.35); color: var(--cyan); background: rgba(0,255,231,0.07); }
+    .decrypt-btn .btn-icon { border-color: rgba(255,45,120,0.35); color: var(--pink); background: rgba(255,45,120,0.07); }
+
+    .btn-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 17px; font-weight: 700;
+      letter-spacing: 0.12em; color: #e0e8ff;
+    }
+
+    .btn-desc { font-size: 13px; color: #3a4060; margin-top: 5px; letter-spacing: 0.06em; }
+
+    .arrow { font-size: 24px; color: #2a2e45; }
+    .encrypt-btn:hover .arrow { color: var(--cyan); }
+    .decrypt-btn:hover .arrow { color: var(--pink); }
+
+    .footer { margin-top: 48px; font-size: 12px; color: #1e2235; letter-spacing: 0.12em; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <span class="badge">Caesar Cipher</span>
+  <h1>Message <span>Encrypt</span></h1>
+  <p class="subtitle">ASCII-BASED ENCRYPTION AND DECRYPTION  &nbsp;·&nbsp; </p>
+
+  <div class="option-buttons">
+    <a class="option-btn encrypt-btn" href="encrypt.html">
+      <div class="btn-left">
+        <div class="btn-icon"></div>
+        <div>
+          <div class="btn-label">ENCRYPT</div>
+          <div class="btn-desc"></div>
+        </div>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+    <a class="option-btn decrypt-btn" href="decrypt.html">
+      <div class="btn-left">
+        <div class="btn-icon"></div>
+        <div>
+          <div class="btn-label">DECRYPT</div>
+          <div class="btn-desc"></div>
+        </div>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+  </div>
+
+  <p class="footer"></p>
+</div>
+</body>
+</html>
